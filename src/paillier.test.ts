@@ -19,4 +19,4 @@ describe("paillier", async () => {
       expect(decrypted).toBe(message)
     }
   }, { timeout: 60000 })
-}) 
+})

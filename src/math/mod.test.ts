@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { modSymmetric2 as modSymmetric } from "./mod";
+import { modSymmetric } from "./mod";
 
 describe("modSymmetric", () => {
   test("should return smallest absolute value for positive numbers", () => {
@@ -17,7 +17,7 @@ describe("modSymmetric", () => {
   });
 
   test("should handle large numbers", () => {
-    expect(modSymmetric(1000n, 17n)).toBe(-7n);
-    expect(modSymmetric(-1000n, 17n)).toBe(7n);
+    expect(modSymmetric(1000n, 17n)).toBe(-3n);
+    expect(modSymmetric(-1000n, 17n)).toBe(3n);
   });
 }); 
