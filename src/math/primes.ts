@@ -26,7 +26,7 @@ const generatePrimes = async (below: number): Promise<bigint[]> => {
 }
 
 const PRIMES_BOUND = 1 << 20 // 1,048,576
-let PRIMES: bigint[] = []
+export let PRIMES: bigint[] = []
 const BLUM_SIEVE_SIZE = 1 << 18 // 262,144
 const BLUM_PRIMALITY_ITERATIONS = 20
 
@@ -37,8 +37,7 @@ export const initializePrimes = async () => {
   }
 }
 
-// Sieve logic to check for safe Blum primes
-const tryBlumPrime = async (): Promise<bigint | null> => {
+const tryAndSampleBlumPrime = async (): Promise<bigint | null> => {
   await initializePrimes()
 
   const bytes = RandomBytes.getBytes((BITS_BLUM_PRIME + 7) / 8)
@@ -80,13 +79,15 @@ const tryBlumPrime = async (): Promise<bigint | null> => {
   return null
 }
 
-export const findValidBlumPrime = async (): Promise<bigint> => {
+
+export const sampleBlumPrime = async (): Promise<bigint> => {
   let result: bigint | null = null
   while (result === null) {
-    result = await tryBlumPrime()
+    result = await tryAndSampleBlumPrime()
   }
   return result
 }
+
 
 
 export class InvalidPrimeBitsError extends CustomError {
@@ -119,5 +120,14 @@ export const validateBlumPrime = async (p: bigint): Promise<void> => {
   const isPrime = await isProbablyPrime(pMinus1div2, 1)
   if (!isPrime) {
     throw new InvalidPrimeFactorError(pMinus1div2)
+  }
+}
+
+export const isValidBlumPrime = async (p: bigint): Promise<boolean> => {
+  try {
+    await validateBlumPrime(p)
+    return true
+  } catch (_) {
+    return false
   }
 }

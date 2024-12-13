@@ -1,7 +1,10 @@
 {
-  "name": "mpc-tss",
+  "name": "@hiddentao/mpc-tss",
   "module": "src/index.ts",
   "type": "module",
+  "scripts": {
+    "test": "bun test"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

@@ -5,18 +5,18 @@ import {
   InvalidPrimeBitsError,
   InvalidPrimeFactorError, 
   InvalidPrimeMod4Error,
-  findValidBlumPrime, 
   initializePrimes, 
+  sampleBlumPrime, 
   validateBlumPrime
-} from "./index"
+} from "./primes"
 
 describe("Primes", () => {
-  test("should initialize primes", async () => {
+  test("initializePrimes - should initialize primes", async () => {
     await initializePrimes()
   })
 
-  test("should generate valid Blum primes", async () => {
-    const p = await findValidBlumPrime()
+  test("sampleBlumPrime - should generate valid Blum primes", async () => {
+    const p = await sampleBlumPrime()
     
     expect(p % 4n).toBe(3n)
     expect(bitLength(p)).toBeLessThanOrEqual(BITS_BLUM_PRIME)

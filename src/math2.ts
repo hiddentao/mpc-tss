@@ -1,4 +1,4 @@
-import { gcd } from "bigint-crypto-utils";
+import { abs, gcd, modMultiply } from "bigint-crypto-utils";
 
 /**
  * Checks if numbers are in range [1,…,N-1] and co-prime to N
@@ -20,3 +20,4 @@ export function checkScalarsRangeAndCoprime(N: bigint, ...nums: bigint[]): boole
   }
   return true;
 }
+
