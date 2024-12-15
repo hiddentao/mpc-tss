@@ -1,5 +1,5 @@
+import { bytesToNumberBE } from "@noble/curves/abstract/utils";
 import { bitLength, gcd } from "bigint-crypto-utils";
-import { bytesToBigInt } from "../bytes";
 import { MaxIterationsExceededError } from "../errors";
 import { RandomBytes } from "../rand";
 
@@ -10,7 +10,7 @@ export const sampleUnitModN = (modulus: bigint): bigint => {
 
   for (let i = 0; i < MAX_SAMPLE_ITERATIONS; i++) {
     const bits = RandomBytes.getBytes(randByteLength);
-    const r = bytesToBigInt(bits);
+    const r = bytesToNumberBE(bits);
     if ((gcd(r, modulus) === 1n)) {
       return r;
     }

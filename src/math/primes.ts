@@ -1,7 +1,7 @@
 import { bitLength, isProbablyPrime } from "bigint-crypto-utils"
 import { CustomError } from "ts-custom-error"
-import { bytesToBigInt } from "../bytes"
 import { BITS_BLUM_PRIME } from "../constants"
+import { bytesToBigInt } from "../number"
 import { RandomBytes } from "../rand"
 
 // Generate an array containing all the odd prime numbers < below

@@ -1,1 +1,4 @@
-* Always define a custom error using the ts-custom-errors package
+For Typescript code the following rules shall ALWAYS apply:
+
+* All thrown errors should be defined as custom errors.
+* Always define a custom error using the `ts-custom-errors` package.

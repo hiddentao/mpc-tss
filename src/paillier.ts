@@ -1,6 +1,7 @@
 import { abs, gcd, modInv, modMultiply, modPow, randBetween } from "bigint-crypto-utils"
 import { CustomError } from 'ts-custom-error'
 import { isValidBlumPrime, modSymmetric, sampleBlumPrime, sampleUnitModN } from "./math"
+import { PedersenParams } from "./pederson"
 
 class InvalidCiphertextError extends CustomError {
   constructor(ciphertext: bigint) {
@@ -11,20 +12,6 @@ class InvalidCiphertextError extends CustomError {
 class InvalidPlaintextError extends CustomError {
   constructor(plaintext: bigint) {
     super(`Plaintext ${plaintext.toString()} must be in range [-(N-1)/2, ..., (N-1)/2]`)
-  }
-}
-
-export class PedersenParams {
-  public readonly n: bigint;
-  public readonly s: bigint;
-  public readonly t: bigint;
-  public readonly lambda: bigint;
-
-  constructor(n: bigint, s: bigint, t: bigint, lambda: bigint) {
-    this.n = n;
-    this.s = s;
-    this.t = t;
-    this.lambda = lambda;
   }
 }
 
@@ -40,7 +27,7 @@ export class PaillierPublicKey {
   public readonly nSquared: bigint
   public readonly nPlusOne: bigint
 
-  constructor(n: bigint) {
+  constructor({ n }: { n: bigint }) {
     this.n = n
     this.nSquared = n ** 2n
     this.nPlusOne = n + 1n
@@ -79,13 +66,13 @@ export class PaillierSecretKey {
   private readonly phiInv: bigint
   public readonly publicKey: PaillierPublicKey
 
-  constructor(p: bigint, q: bigint) {
+  constructor({ p, q }: { p: bigint; q: bigint }) {
     this.p = p
     this.q = q
     const n = p * q
     this.phi = (p - 1n) * (q - 1n)
     this.phiInv = modInv(this.phi, n)
-    this.publicKey = new PaillierPublicKey(n)
+    this.publicKey = new PaillierPublicKey({ n })
   }
 
   public static async generate(): Promise<PaillierSecretKey> {
@@ -93,7 +80,7 @@ export class PaillierSecretKey {
       sampleBlumPrime(),
       sampleBlumPrime(),
     ])
-    return new PaillierSecretKey(p, q)
+    return new PaillierSecretKey({ p, q })
   }
 
 
@@ -116,7 +103,7 @@ export class PaillierSecretKey {
     const tau = sampleUnitModN(this.publicKey.n);
     const t = modMultiply([tau, tau], this.publicKey.n);
     const s = modPow(t, lambda, this.publicKey.n);
-    return new PedersenParams(this.publicKey.n, s, t, lambda);
+    return new PedersenParams({ n: this.publicKey.n, s, t, lambda });
   }
 }
 
