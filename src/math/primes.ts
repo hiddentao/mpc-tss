@@ -1,7 +1,7 @@
+import { bytesToNumberBE } from "@noble/curves/abstract/utils"
 import { bitLength, isProbablyPrime } from "bigint-crypto-utils"
 import { CustomError } from "ts-custom-error"
 import { BITS_BLUM_PRIME } from "../constants"
-import { bytesToBigInt } from "../number"
 import { RandomBytes } from "../rand"
 
 // Generate an array containing all the odd prime numbers < below
@@ -43,7 +43,7 @@ const tryAndSampleBlumPrime = async (): Promise<bigint | null> => {
   const bytes = RandomBytes.getBytes((BITS_BLUM_PRIME + 7) / 8)
   bytes[bytes.length - 1] |= 3 // Clear low bits to ensure 3 mod 4
   bytes[0] |= 0xc0 // Ensure the top two bits are set
-  const base = bytesToBigInt(bytes)
+  const base = bytesToNumberBE(bytes)
 
   const sieve = new Array(BLUM_SIEVE_SIZE).fill(true)
   for (let i = 1; i + 2 < sieve.length; i += 4) {
