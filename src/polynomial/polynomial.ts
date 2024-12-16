@@ -1,5 +1,5 @@
 import { CustomError } from "ts-custom-error"
-import type { Curve } from "./curves"
+import type { Curve } from "../curves"
 
 export class PolynomialSecretLeakError extends CustomError {
   constructor() {
@@ -17,7 +17,7 @@ export class Polynomial {
    * Creates a new polynomial f(X) = constant + a₁⋅X + … + aₜ⋅Xᵗ,
    * with coefficients in ℤₚ and degree t.
    *
-   * @param group The elliptic curve group.
+   * @param curve The elliptic curve group.
    * @param degree The degree of the polynomial.
    * @param constant The constant term. Defaults to 0 if not set.
    */

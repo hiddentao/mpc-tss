@@ -1,4 +1,4 @@
-import { randBytesSync } from "bigint-crypto-utils"
+import { randBetween, randBytesSync } from "bigint-crypto-utils"
 
 export class RandomBytes<T extends number> {
   private readonly n: Uint8Array
@@ -16,3 +16,7 @@ export class RandomBytes<T extends number> {
   }
 }
 
+
+export const randomBigInt = (max: bigint, min?: bigint): bigint => {
+  return randBetween(max, min)
+}

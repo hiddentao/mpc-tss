@@ -1,11 +1,14 @@
 import { secp256k1 } from "@noble/curves/secp256k1"
 import { modAdd, modInv, modMultiply, modPow, randBetween } from 'bigint-crypto-utils'
-import type { Curve } from './types';
+import type { AffinePoint, Curve } from './types';
 
 
 export class Secp256k1Curve implements Curve {
-  public readonly N: bigint = secp256k1.CURVE.n;
-  public readonly BASE = secp256k1.ProjectivePoint.BASE;
+  public readonly name = 'secp256k1'
+  public readonly N: bigint = secp256k1.CURVE.n
+  public readonly ProjectivePoint = secp256k1.ProjectivePoint
+  public readonly BASE = secp256k1.ProjectivePoint.BASE
+  public readonly ZERO = secp256k1.ProjectivePoint.ZERO
 
   public mod(x: bigint): bigint {
     return modAdd([x, 0], this.N);
@@ -41,6 +44,12 @@ export class Secp256k1Curve implements Curve {
 
   public sampleScalar(): bigint {
     return randBetween(this.N - 1n);
+  }
+
+  public sampleScalarPointPair(): [bigint, AffinePoint] {
+    const scalar = this.sampleScalar();
+    const point = this.BASE.multiply(scalar);
+    return [scalar, point.toAffine()];
   }
 }
 

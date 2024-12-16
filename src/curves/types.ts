@@ -1,7 +1,14 @@
 import type { secp256k1 } from "@noble/curves/secp256k1";
 
+export type AffinePoint = Parameters<typeof secp256k1.ProjectivePoint.fromAffine>[0];
+export type ProjectivePoint = ReturnType<typeof secp256k1.ProjectivePoint.fromAffine>;
+
 export interface Curve {
   readonly N: bigint;
+  readonly name: string;
+  readonly ProjectivePoint: typeof secp256k1.ProjectivePoint;
+  readonly BASE: ProjectivePoint;
+  readonly ZERO: ProjectivePoint;
   mod(x: bigint): bigint;
   mul(lhs: bigint, rhs: bigint): bigint;
   add(lhs: bigint, rhs: bigint): bigint;
@@ -11,10 +18,8 @@ export interface Curve {
   pow(x: bigint, e: bigint): bigint;
   isOverHalfOrder(x: bigint): boolean;
   sampleScalar(): bigint;
+  sampleScalarPointPair(): [bigint, AffinePoint];
 }
-
-export type AffinePoint = Parameters<typeof secp256k1.ProjectivePoint.fromAffine>[0];
-export type ProjectivePoint = ReturnType<typeof secp256k1.ProjectivePoint.fromAffine>;
 
 export function isAffinePoint(data: any): data is AffinePoint {
   return typeof data === "object" && data !== null && "x" in data && "y" in data;
