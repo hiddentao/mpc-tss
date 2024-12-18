@@ -1,10 +1,15 @@
 import type { AffinePoint, Curve } from "../curves"
+import type { HashableInput, HashableInputFactory } from "../hasher"
 
-export class SchnorrCommitment {
+export class SchnorrCommitment implements HashableInputFactory {
   public readonly C: AffinePoint
 
   constructor({ C }: { C: AffinePoint }) {
     this.C = C
+  }
+
+  public getHashableInputs(): HashableInput[] {
+    return [this.C]
   }
 }
 

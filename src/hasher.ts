@@ -31,9 +31,11 @@ class HasherZeroCommitmentError extends CustomError {
   }
 }
 
-export type HashableInput = Input | bigint | ProjectivePoint | AffinePoint | {
-  getHashableInputs: () => HashableInput[]
+export interface HashableInputFactory {
+  getHashableInputs(): HashableInput[]
 }
+
+export type HashableInput = Input | bigint | ProjectivePoint | AffinePoint | HashableInputFactory
 
 export class Hasher {
   private readonly hash: ReturnType<typeof blake3.create>

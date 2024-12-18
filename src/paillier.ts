@@ -1,7 +1,7 @@
 import { abs, gcd, modInv, modMultiply, modPow, randBetween } from "bigint-crypto-utils"
 import { CustomError } from 'ts-custom-error'
 import { isValidBlumPrime, modSymmetric, sampleBlumPrime, sampleUnitModN } from "./math"
-import { PedersenParams } from "./pederson"
+import { PedersenParams } from "./pedersen"
 
 class InvalidCiphertextError extends CustomError {
   constructor(ciphertext: bigint) {
@@ -98,7 +98,7 @@ export class PaillierSecretKey {
     return modSymmetric(m2, this.publicKey.n);
   }
 
-  samplePedersonParams(): PedersenParams {
+  samplePedersenParams(): PedersenParams {
     const lambda = randBetween(this.phi);
     const tau = sampleUnitModN(this.publicKey.n);
     const t = modMultiply([tau, tau], this.publicKey.n);

@@ -1,6 +1,6 @@
 import type { Secp256k1_AffinePoint } from "./curves"
 import type { PaillierPublicKey } from "./paillier"
-import type { PedersenParams } from "./pederson"
+import type { PedersenParams } from "./pedersen"
 import type { PartyId } from "./types"
 
 export class PartyPublicKeyConfig {
