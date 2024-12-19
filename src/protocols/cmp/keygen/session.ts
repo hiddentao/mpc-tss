@@ -1,3 +1,4 @@
+import { CustomError } from "ts-custom-error";
 import { Secp256k1 } from "../../../curves/index";
 import { Hasher } from "../../../hasher";
 import type { Logger } from "../../../logging";
@@ -8,6 +9,11 @@ import type { ProtocolNetworking } from "../../common/networking";
 import type { Session } from "../../common/session";
 import { CmpInvalidThresholdError, CmpMinimumPartiesError } from "../common";
 
+export class CmpKeygenInvalidPartyListError extends CustomError {
+  public constructor(msg: string) {
+    super(msg)
+  }
+}
 
 /**
  * CMP Keygen session.
@@ -45,16 +51,21 @@ export class CmpKeygenSession implements Session {
   public constructor({
     logger,
     selfPartyId,
+    allPartyIds,
     threshold,
     numParties,
     networking,
   }: {
     logger: Logger,
     selfPartyId?: string,
+    allPartyIds?: PartyId[],
     threshold: number,
     numParties: number,
     networking: ProtocolNetworking,
   }) {
+    this.numParties = numParties
+    this.threshold = threshold
+
     if (numParties < 2) {
       throw new CmpMinimumPartiesError();
     }
@@ -64,17 +75,35 @@ export class CmpKeygenSession implements Session {
     }
 
     this.partyId = selfPartyId ? `${selfPartyId}-${randomChars(8)}` : randomPartyId()
-    this.allPartyIds.push(this.partyId)
+
     this.logger = logger.createSub(this.partyId)
-    this.numParties = numParties
-    this.threshold = threshold
+
+    if (allPartyIds) {
+      if (allPartyIds.length !== numParties) {
+        throw new CmpKeygenInvalidPartyListError(`Expected ${numParties} party ids, got ${allPartyIds.length}`)
+      }
+
+      if (!this.allPartyIds.includes(this.partyId)) {
+        throw new CmpKeygenInvalidPartyListError(`Party ${this.partyId} is not in the provided list of all party ids`)
+      }
+
+      this.allPartyIds = allPartyIds
+
+      this.logger.info(`Setting all party ids: ${this.allPartyIds.join('|')}`)
+    }
+
     this.hasher = Hasher.create().update('CMP-SESSION')
     this.hasher.update(this.protocolId);
     this.hasher.update(this.curve.name);
     this.hasher.update(BigInt(this.threshold));
     this.hasher.update(BigInt(this.numParties));
+    if (this.allPartyIds.length) {
+      this.hasher.update(this.allPartyIds.join('|'))
+    }
+
     this.vssConstant = this.curve.sampleScalar();
     this.vssSecret = new Polynomial({ curve: this.curve, degree: this.threshold, constant: this.vssConstant });
+    
     this.networking = networking;
   }
 }

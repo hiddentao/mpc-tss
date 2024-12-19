@@ -5,15 +5,25 @@ import type { PaillierSecretKey } from "../../../paillier"
 import type { PedersenParams } from "../../../pedersen"
 import type { Exponent } from "../../../polynomial/exponent"
 import type { PartyId } from "../../../types"
-import type { SchnorrRandomness } from "../../../zk/sch"
+import type { SchnorrCommitment, SchnorrRandomness } from "../../../zk/sch"
 import type { Round } from "../../common/round"
-import { CmpKeygenRound3, type CmpKeygenSession } from "./index"
+import { type CmpKeygenRound1Message, CmpKeygenRound3, type CmpKeygenSession } from "./index"
 
 
 export class CmpKeygenInvalidRound1CommitmentError extends CustomError {
   public constructor(sender: PartyId, e: Error) {
     super(`Invalid round 1 commitment from ${sender}: ${e.message}`)
   }
+}
+
+export type CmpKeygenRound2Message = {
+  rid: bigint
+  chainKey: bigint
+  vssPolynomial: Exponent
+  schnorrCommitment: SchnorrCommitment
+  elGamalPublic: AffinePoint
+  pedersonParams: PedersenParams
+  decommitment: Uint8Array
 }
 
 export class CmpKeygenRound2 implements Round {
@@ -76,7 +86,7 @@ export class CmpKeygenRound2 implements Round {
     })
 
     messages.forEach((msg) => {
-      const { commitment } = msg.data as { commitment: Uint8Array }
+      const { commitment } = msg.data as CmpKeygenRound1Message
 
       try {
         Hasher.validateCommitment(commitment)
@@ -85,11 +95,6 @@ export class CmpKeygenRound2 implements Round {
       }
       
       this.commitments[msg.sender] = commitment
-      if (!session.allPartyIds.includes(msg.sender)) {
-        session.logger.info(`Discovered new party id: ${msg.sender}`)
-
-        session.allPartyIds.push(msg.sender)
-      }
     })
 
     Object.freeze(this.commitments)
@@ -103,9 +108,9 @@ export class CmpKeygenRound2 implements Round {
         vssPolynomial: this.vssPolynomial,
         schnorrCommitment: this.schnorrRand.commitment,
         elGamalPublic: this.elGamalPublic,
-        pedersenPublicN: this.pedersenParams.n,
+        pedersonParams: this.pedersenParams,
         decommitment: this.decommitment,
-      },
+      } as CmpKeygenRound2Message,
     })
 
     return new CmpKeygenRound3({

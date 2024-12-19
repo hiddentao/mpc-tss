@@ -8,10 +8,14 @@ import type { Round } from "../../common/round.js"
 import type { CmpKeygenSession } from "./index.js"
 import { CmpKeygenRound2 } from "./round2.js"
 
+export type CmpKeygenRound1Message = {
+  commitment: Uint8Array
+}
+
 export class CmpKeygenRound1 implements Round {
   public async process(session: CmpKeygenSession): Promise<Round> {
     session.logger.info(`Processing round 1`)
-    
+
     const paillierSecret = await PaillierSecretKey.generate()
     const pedersenParams = paillierSecret.samplePedersenParams()
     const [elGamalSecret, elGamalPublic] = session.curve.sampleScalarPointPair()
@@ -42,7 +46,7 @@ export class CmpKeygenRound1 implements Round {
 
     await session.networking.sendMessage({
       session,
-      data: { commitment },
+      data: { commitment } as CmpKeygenRound1Message,
     })
 
     return new CmpKeygenRound2({

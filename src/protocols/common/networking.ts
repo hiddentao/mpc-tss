@@ -3,7 +3,7 @@ import { NETWORKING_TIMEOUT } from '../../constants';
 import type { PartyId } from '../../types';
 import type { Session } from "./session";
 
-export class InvalidTargetError extends CustomError {
+export class ProtocolNetworkingInvalidSenderError extends CustomError {
   constructor(msg: string) {
     super(msg);
   }
@@ -53,7 +53,7 @@ export class ProtocolNetworking {
 
   public async fetchReceivedMessages({ session, targetRound }: { session: Session, targetRound?: TargetRoundNum }) {
     targetRound = targetRound || session.currentRound
-    
+
     session.logger.info(`Fetching received broadcast messages for round ${targetRound}`)
 
     return await new Promise<ProtocolMessage[]>((resolve, reject) => {
@@ -72,6 +72,19 @@ export class ProtocolNetworking {
           clearInterval(interval)
 
           session.logger.info(`Received ${msgs.length} messages for round ${targetRound}`)
+
+          if (!session.allPartyIds.length) {
+            session.allPartyIds.push(session.partyId)
+            session.allPartyIds.push(...msgs.map(({ sender }) => sender))
+            session.logger.info(`Setting all party ids: ${session.allPartyIds.join('|')}`)
+          } else {
+            // check that the received messages are all in the session.allPartyIds list
+            for (const msg of msgs) {
+              if (!session.allPartyIds.includes(msg.sender)) {
+                throw new ProtocolNetworkingInvalidSenderError(`Party ${msg.sender} is not in the provided list of all party ids`)
+              }
+            }
+          }
 
           resolve(msgs)
         } else {
