@@ -89,28 +89,24 @@ describe("Hasher", () => {
     })
 
     test("should reject zero commitment", () => {
-      const hasher = Hasher.create()
       const zeroCommitment = new Uint8Array(SEC_BYTES)
-      expect(() => hasher.validateCommitment(zeroCommitment)).toThrow("Hasher commitment is 0")
+      expect(() => Hasher.validateCommitment(zeroCommitment)).toThrow("Hasher commitment is 0")
     })
 
     test("should reject invalid commitment length", () => {
-      const hasher = Hasher.create()
       const invalidCommitment = new Uint8Array(SEC_BYTES - 1)
-      expect(() => hasher.validateCommitment(invalidCommitment))
+      expect(() => Hasher.validateCommitment(invalidCommitment))
         .toThrow(`Hasher commitment length is not equal to ${SEC_BYTES}`)
     })
 
     test("should reject zero decommitment", () => {
-      const hasher = Hasher.create()
       const zeroDecommitment = new Uint8Array(SEC_BYTES)
-      expect(() => hasher.validateDecommitment(zeroDecommitment)).toThrow("Hasher decommitment is 0")
+      expect(() => Hasher.validateDecommitment(zeroDecommitment)).toThrow("Hasher decommitment is 0")
     })
 
     test("should reject invalid decommitment length", () => {
-      const hasher = Hasher.create()
       const invalidDecommitment = new Uint8Array(SEC_BYTES - 1)
-      expect(() => hasher.validateDecommitment(invalidDecommitment))
+      expect(() => Hasher.validateDecommitment(invalidDecommitment))
         .toThrow(`Hasher commitment length is not equal to ${SEC_BYTES}`)
     })
 
@@ -133,7 +129,7 @@ describe("Hasher", () => {
   test("should hash object with getHashableInputs correctly", () => {
     const hasher = Hasher.create()
     const obj = {
-      getHashableInputs: () => [new Uint8Array([1, 2, 3]), "test"]
+      getHashableInputs: (): (Uint8Array | string)[] => [new Uint8Array([1, 2, 3]), "test"]
     }
     const digest = hasher.update(obj).digestAsBytes()
     expect(digest).toBeInstanceOf(Uint8Array)

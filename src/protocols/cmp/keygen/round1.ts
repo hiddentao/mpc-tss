@@ -10,11 +10,13 @@ import { CmpKeygenRound2 } from "./round2.js"
 
 export class CmpKeygenRound1 implements Round {
   public async process(session: CmpKeygenSession): Promise<Round> {
+    session.logger.info(`Processing round 1`)
+    
     const paillierSecret = await PaillierSecretKey.generate()
     const pedersenParams = paillierSecret.samplePedersenParams()
     const [elGamalSecret, elGamalPublic] = session.curve.sampleScalarPointPair()
     const selfShare = session.vssSecret.evaluate(
-      idToBigInt(session.selfPartyId),
+      idToBigInt(session.partyId),
     )
     const selfVSSPolynomial = Exponent.fromPolynomial({
       curve: session.curve,
@@ -26,7 +28,7 @@ export class CmpKeygenRound1 implements Round {
     const chainKey = randomBigInt(maxRandomRange)
     const { commitment, decommitment } = session.hasher
       .clone()
-      .update(session.selfPartyId)
+      .update(session.partyId)
       .commit([
         selfRID,
         chainKey,
@@ -38,9 +40,9 @@ export class CmpKeygenRound1 implements Round {
         pedersenParams.t,
       ])
 
-    await session.networking.broadcastMessage({
+    await session.networking.sendMessage({
       session,
-      message: { commitment },
+      data: { commitment },
     })
 
     return new CmpKeygenRound2({

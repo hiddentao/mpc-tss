@@ -1,17 +1,13 @@
-import { CustomError } from "ts-custom-error";
-import { Secp256k1 } from "../../../curves/index.js";
-import { Hasher } from "../../../hasher.js";
+import { Secp256k1 } from "../../../curves/index";
+import { Hasher } from "../../../hasher";
+import type { Logger } from "../../../logging";
 import { Polynomial } from "../../../polynomial";
-import type { ProtocolNetworking } from "../../common/networking.js";
-import type { Session } from "../../common/session.js";
-import { CmpInvalidThresholdError, CmpMinimumPartiesError } from "../common.js";
+import { randomChars, randomPartyId } from "../../../rand";
+import type { PartyId } from "../../../types";
+import type { ProtocolNetworking } from "../../common/networking";
+import type { Session } from "../../common/session";
+import { CmpInvalidThresholdError, CmpMinimumPartiesError } from "../common";
 
-
-class CmpKeygenSessionPartyNotFoundError extends CustomError {
-  constructor() {
-    super("Self party ID not found in the list of all party IDs");
-  }
-}
 
 /**
  * CMP Keygen session.
@@ -19,6 +15,8 @@ class CmpKeygenSessionPartyNotFoundError extends CustomError {
  * Each party has an instance of this class.
  */
 export class CmpKeygenSession implements Session {
+  /** Logger. */
+  public readonly logger: Logger;
   /** Protocol ID. */
   public readonly protocolId = 'cmp/keygen';
   /** Current round number. */
@@ -28,11 +26,13 @@ export class CmpKeygenSession implements Session {
   /** Curve used for the protocol. */
   public readonly curve = Secp256k1
   /** Party ID of the current party. */
-  public readonly selfPartyId: string;
+  public readonly partyId: PartyId;
   /** All party IDs. */
-  public readonly allPartyIds: string[];
+  public readonly allPartyIds: PartyId[] = [];
   /** Maximum number of parties assumed to be corrupted during protocol execution. */
   public readonly threshold: number;
+  /** No. of parties in the protocol. */
+  public readonly numParties: number;
   /** Hasher instance. */
   public readonly hasher: Hasher;
   /** VSS constant. */
@@ -43,43 +43,38 @@ export class CmpKeygenSession implements Session {
   public readonly networking: ProtocolNetworking;
 
   public constructor({
+    logger,
     selfPartyId,
-    allPartyIds,
     threshold,
+    numParties,
     networking,
   }: {
-    selfPartyId: string,
-    allPartyIds: string[],
+    logger: Logger,
+    selfPartyId?: string,
     threshold: number,
+    numParties: number,
     networking: ProtocolNetworking,
   }) {
-    if (allPartyIds.length < 2) {
+    if (numParties < 2) {
       throw new CmpMinimumPartiesError();
     }
 
-    if (!allPartyIds.includes(selfPartyId)) {
-      throw new CmpKeygenSessionPartyNotFoundError();
-    }
-
-    if (threshold < 1 || threshold >= allPartyIds.length) {
+    if (threshold < 1 || threshold > numParties - 1) {
       throw new CmpInvalidThresholdError();
     }
 
-    this.selfPartyId = selfPartyId
-    this.allPartyIds = allPartyIds
+    this.partyId = selfPartyId ? `${selfPartyId}-${randomChars(8)}` : randomPartyId()
+    this.allPartyIds.push(this.partyId)
+    this.logger = logger.createSub(this.partyId)
+    this.numParties = numParties
     this.threshold = threshold
-    
     this.hasher = Hasher.create().update('CMP-SESSION')
     this.hasher.update(this.protocolId);
     this.hasher.update(this.curve.name);
     this.hasher.update(BigInt(this.threshold));
-    for (let partyId of this.allPartyIds) {
-      this.hasher.update(partyId);
-    }
-
+    this.hasher.update(BigInt(this.numParties));
     this.vssConstant = this.curve.sampleScalar();
     this.vssSecret = new Polynomial({ curve: this.curve, degree: this.threshold, constant: this.vssConstant });
-
     this.networking = networking;
   }
 }

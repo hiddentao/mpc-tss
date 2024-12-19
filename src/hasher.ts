@@ -123,7 +123,7 @@ export class Hasher {
     }
   }
 
-  public _validateCommitment(commitment: Uint8Array, type: string): void {
+  protected static _validateCommitment(commitment: Uint8Array, type: string): void {
     if (commitment.length !== SEC_BYTES) {
       throw new HasherBadCommitmentLengthError()
     }
@@ -135,11 +135,11 @@ export class Hasher {
     throw new HasherZeroCommitmentError(type)
   }
 
-  public validateCommitment(commitment: Uint8Array): void {
+  public static validateCommitment(commitment: Uint8Array): void {
     this._validateCommitment(commitment, "commitment")
   }
 
-  public validateDecommitment(decommitment: Uint8Array): void {
+  public static validateDecommitment(decommitment: Uint8Array): void {
     this._validateCommitment(decommitment, "decommitment")
   }
 
@@ -148,8 +148,8 @@ export class Hasher {
     decommitment: Uint8Array,
     data: HashableInput[],
   ): boolean {
-    this.validateCommitment(commitment)
-    this.validateDecommitment(decommitment)
+    Hasher.validateCommitment(commitment)
+    Hasher.validateDecommitment(decommitment)
     const h = this.clone()
     h.updateMulti(data)
     h.update(decommitment)

@@ -24,3 +24,5 @@ export const BITS_PAILLIER: number = 2 * BITS_BLUM_PRIME;
 
 export const BYTES_PAILLIER: number = BITS_PAILLIER / 8;
 export const BYTES_CIPHERTEXT: number = 2 * BYTES_PAILLIER;
+
+export const NETWORKING_TIMEOUT: number = 10000; // 10 seconds

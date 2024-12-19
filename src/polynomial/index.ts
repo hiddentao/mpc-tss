@@ -1,2 +1,2 @@
-export * from "./polynomial.js"
-export * from "./exponent.js"
+export * from "./polynomial"
+export * from "./exponent"

@@ -1,7 +1,11 @@
+import type { Logger } from "../../logging";
+
 /**
  * Protocol Session.
  */
 export interface Session {
+  /** Logger. */
+  readonly logger: Logger;
   /** Protocol ID. */
   readonly protocolId: string;
   /** Current round number. */
@@ -9,7 +13,9 @@ export interface Session {
   /** Final round number. */
   readonly finalRound: number;
   /** Party ID of the current party. */
-  readonly selfPartyId: string;
+  readonly partyId: string;
   /** All party IDs. */
   readonly allPartyIds: string[];
+  /** Number of parties. */
+  readonly numParties: number;
 } 

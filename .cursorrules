@@ -1,4 +1,5 @@
 For Typescript code the following rules shall ALWAYS apply:
 
-* All thrown errors should be defined as custom errors.
-* Always define a custom error using the `ts-custom-errors` package.
+* Do NOT use `new Error`. Instead, define a custom error using the `ts-custom-errors` package.
+* When importing from modules do NOT append `.js` to the module filename.
+* When exporting from modules to NOT append `.js` to the module filename.
