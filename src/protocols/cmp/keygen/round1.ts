@@ -40,9 +40,7 @@ export class CmpKeygenRound1 extends SerializableObject implements Round {
         selfVSSPolynomial,
         schnorrRand.commitment,
         elGamalPublic,
-        pedersenParams.n,
-        pedersenParams.s,
-        pedersenParams.t,
+        pedersenParams.publicParams,
       ])
 
     await session.networking.sendMessage({

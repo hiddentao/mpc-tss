@@ -3,7 +3,7 @@ import type { AffinePoint } from "../../../curves/types"
 import { Hasher } from "../../../hasher"
 import { SerializableObject } from "../../../object"
 import type { PaillierSecretKey } from "../../../paillier"
-import type { PedersenParams } from "../../../pedersen"
+import type { PedersenParams, PedersenPublicParams } from "../../../pedersen"
 import type { Exponent } from "../../../polynomial/exponent"
 import type { PartyId } from "../../../types"
 import type { SchnorrCommitment, SchnorrRandomness } from "../../../zk/sch"
@@ -23,7 +23,7 @@ export type CmpKeygenRound2Message = {
   vssPolynomial: Exponent
   schnorrCommitment: SchnorrCommitment
   elGamalPublic: AffinePoint
-  pedersonParams: PedersenParams
+  pedersonPublicParams: PedersenPublicParams
   decommitment: Uint8Array
 }
 
@@ -111,7 +111,7 @@ export class CmpKeygenRound2 extends SerializableObject implements Round {
         vssPolynomial: this.vssPolynomial,
         schnorrCommitment: this.schnorrRand.commitment,
         elGamalPublic: this.elGamalPublic,
-        pedersonParams: this.pedersenParams,
+        pedersonPublicParams: this.pedersenParams.publicParams,
         decommitment: this.decommitment,
       } as CmpKeygenRound2Message,
     })
