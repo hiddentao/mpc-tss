@@ -2,6 +2,7 @@ import { CustomError } from "ts-custom-error";
 import { Secp256k1 } from "../../../curves/index";
 import { Hasher } from "../../../hasher";
 import type { Logger } from "../../../logging";
+import { SerializableObject } from "../../../object";
 import { Polynomial } from "../../../polynomial";
 import { randomChars, randomPartyId } from "../../../rand";
 import type { PartyId } from "../../../types";
@@ -20,7 +21,7 @@ export class CmpKeygenInvalidPartyListError extends CustomError {
  * 
  * Each party has an instance of this class.
  */
-export class CmpKeygenSession implements Session {
+export class CmpKeygenSession extends SerializableObject implements Session {
   /** Logger. */
   public readonly logger: Logger;
   /** Protocol ID. */
@@ -48,6 +49,15 @@ export class CmpKeygenSession implements Session {
   /** Networking layer. */
   public readonly networking: ProtocolNetworking;
 
+  public override getSerializableValues() {
+    const values = super.getSerializableValues()
+    delete values.logger
+    delete values.networking  
+    delete values.hasher
+    delete values.curve
+    return values
+  }
+
   public constructor({
     logger,
     selfPartyId,
@@ -63,6 +73,8 @@ export class CmpKeygenSession implements Session {
     numParties: number,
     networking: ProtocolNetworking,
   }) {
+    super()
+
     this.numParties = numParties
     this.threshold = threshold
 

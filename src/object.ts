@@ -16,6 +16,10 @@ export type SerializedObject = string | number | boolean | null | SerializedObje
  * Base class for all objects that can be serialized.
  */
 export class SerializableObject {
+  public constructor() {
+    Serializer.addType(this.constructor.name, this.constructor as typeof SerializableObject)
+  }
+
   /**
    * Allocate a new instance of this class.
    *
@@ -90,13 +94,19 @@ export class Serializer {
         __t: 'bigint',
         __j: { value: obj.toString() }
       }
-    }  
+    }
+    else if (obj instanceof Uint8Array) {
+      return {
+        __t: 'Uint8Array', 
+        __j: { value: Buffer.from(obj).toString('hex') }
+      }
+    }
     else if (obj instanceof SerializableObject) {
       return {
         __t: obj.constructor.name,
         __j: Serializer._serializeValues(obj.getSerializableValues())
       }
-    } 
+    }
     else if (Array.isArray(obj)) {
       return obj.map(Serializer.serialize)
     } 
@@ -126,6 +136,8 @@ export class Serializer {
     } else if (json.__t) { 
       if (json.__t === 'bigint') {
         return BigInt(json.__j.value as string)
+      } else if (json.__t === 'Uint8Array') {
+        return new Uint8Array(Buffer.from(json.__j.value as string, 'hex'))
       } else if (json.__t === 'object') {
         return Serializer._deserializeValues(json.__j)
       } else {

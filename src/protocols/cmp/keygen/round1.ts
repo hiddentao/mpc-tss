@@ -1,4 +1,5 @@
 import { idToBigInt } from "../../../number.js"
+import { SerializableObject } from "../../../object.js"
 import { PaillierSecretKey } from "../../../paillier"
 import { Exponent } from "../../../polynomial/exponent.js"
 import { randomBigInt } from "../../../rand.js"
@@ -12,7 +13,7 @@ export type CmpKeygenRound1Message = {
   commitment: Uint8Array
 }
 
-export class CmpKeygenRound1 implements Round {
+export class CmpKeygenRound1 extends SerializableObject implements Round {
   public async process(session: CmpKeygenSession): Promise<Round> {
     session.logger.info(`Processing round 1`)
 

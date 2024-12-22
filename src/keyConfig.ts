@@ -1,12 +1,13 @@
-import type { Secp256k1_AffinePoint } from "./curves"
+import type { AffinePoint } from "./curves"
+import { SerializableObject } from "./object"
 import type { PaillierPublicKey } from "./paillier"
 import type { PedersenParams } from "./pedersen"
 import type { PartyId } from "./types"
 
-export class PartyPublicKeyConfig {
+export class PartyPublicKeyConfig extends SerializableObject {
   public readonly id: PartyId
-  public readonly ecdsa: Secp256k1_AffinePoint
-  public readonly elgamal: Secp256k1_AffinePoint
+  public readonly ecdsa: AffinePoint
+  public readonly elgamal: AffinePoint
   public readonly paillier: PaillierPublicKey
   public readonly pedersen: PedersenParams
 
@@ -18,11 +19,12 @@ export class PartyPublicKeyConfig {
     pedersen
   }: {
     id: PartyId
-    ecdsa: Secp256k1_AffinePoint
-    elgamal: Secp256k1_AffinePoint
+    ecdsa: AffinePoint
+    elgamal: AffinePoint
     paillier: PaillierPublicKey
     pedersen: PedersenParams
   }) {
+    super()
     this.id = id
     this.ecdsa = ecdsa
     this.elgamal = elgamal
@@ -55,8 +57,8 @@ export class PartySecretKeyConfig extends PartyPublicKeyConfig {
     publicPartyData
   }: {
     id: PartyId
-    ecdsa: Secp256k1_AffinePoint
-    elgamal: Secp256k1_AffinePoint
+    ecdsa: AffinePoint
+    elgamal: AffinePoint
     paillier: PaillierPublicKey
     pedersen: PedersenParams
     threshold: number

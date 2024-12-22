@@ -1,6 +1,8 @@
-import { abs, gcd, modInv, modMultiply, modPow, randBetween } from "bigint-crypto-utils"
+import { abs, bitLength, gcd, modInv, modMultiply, modPow, randBetween } from "bigint-crypto-utils"
 import { CustomError } from 'ts-custom-error'
+import { BITS_PAILLIER } from "./constants"
 import { isValidBlumPrime, modSymmetric, sampleBlumPrime, sampleUnitModN } from "./math"
+import { SerializableObject } from "./object"
 import { PedersenParams } from "./pedersen"
 
 class InvalidCiphertextError extends CustomError {
@@ -15,19 +17,24 @@ class InvalidPlaintextError extends CustomError {
   }
 }
 
+class PaillierInvalidModulusError extends CustomError {
+  constructor(message: string) {
+    super(message)
+  }
+}
 
 export type PaillierEncryptionResult = {
   ciphertext: bigint
   nonce: bigint
 }
 
-
-export class PaillierPublicKey {
+export class PaillierPublicKey extends SerializableObject {
   public readonly n: bigint
   public readonly nSquared: bigint
   public readonly nPlusOne: bigint
 
   constructor({ n }: { n: bigint }) {
+    super()
     this.n = n
     this.nSquared = n ** 2n
     this.nPlusOne = n + 1n
@@ -59,19 +66,20 @@ export class PaillierPublicKey {
   }
 }
 
-export class PaillierSecretKey {
-  private readonly p: bigint
-  private readonly q: bigint
-  private readonly phi: bigint
-  private readonly phiInv: bigint
+export class PaillierSecretKey extends SerializableObject {
+  private readonly _p: bigint
+  private readonly _q: bigint
+  private readonly _phi: bigint
+  private readonly _phiInv: bigint
   public readonly publicKey: PaillierPublicKey
 
   constructor({ p, q }: { p: bigint; q: bigint }) {
-    this.p = p
-    this.q = q
+    super()
+    this._p = p
+    this._q = q
     const n = p * q
-    this.phi = (p - 1n) * (q - 1n)
-    this.phiInv = modInv(this.phi, n)
+    this._phi = (p - 1n) * (q - 1n)
+    this._phiInv = modInv(this._phi, n)
     this.publicKey = new PaillierPublicKey({ n })
   }
 
@@ -93,13 +101,13 @@ export class PaillierSecretKey {
     const nSquared = this.publicKey.nSquared
 
     // Perform decryption using the private key.
-    const m1 = (modPow(ciphertext, this.phi, nSquared) - 1n) / n
-    const m2 = modMultiply([m1, this.phiInv], n)
+    const m1 = (modPow(ciphertext, this._phi, nSquared) - 1n) / n
+    const m2 = modMultiply([m1, this._phiInv], n)
     return modSymmetric(m2, this.publicKey.n);
   }
 
   samplePedersenParams(): PedersenParams {
-    const lambda = randBetween(this.phi);
+    const lambda = randBetween(this._phi);
     const tau = sampleUnitModN(this.publicKey.n);
     const t = modMultiply([tau, tau], this.publicKey.n);
     const s = modPow(t, lambda, this.publicKey.n);
@@ -111,6 +119,29 @@ export const isValidPaillierPrime = async (p: bigint): Promise<boolean> => {
   return await isValidBlumPrime(p)
 }
 
+export const validatePaillierModulus = async (n: bigint): Promise<void> => {
+  if (!n) {
+    throw new PaillierInvalidModulusError("modulus N is nil")
+  }
+
+  const bits = bitLength(n)
+  if (bits !== BITS_PAILLIER) {
+    throw new PaillierInvalidModulusError(`have: ${bits}, need ${BITS_PAILLIER}: wrong number bit length of Paillier modulus N`)
+  }
+
+  if (n % 2n === 0n) {
+    throw new PaillierInvalidModulusError("modulus N is even")
+  }
+}
+
+export const isValidPaillierModulus = async (n: bigint): Promise<boolean> => {
+  try {
+    await validatePaillierModulus(n)
+    return true
+  } catch (_) {
+    return false
+  }
+}
 
 // TODO: // Example Usage
 // ;(async () => {

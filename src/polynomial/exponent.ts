@@ -1,6 +1,7 @@
 import { CustomError } from "ts-custom-error"
 import type { AffinePoint, Curve, ProjectivePoint } from "../curves"
 import type { HashableInput, HashableInputFactory } from "../hasher"
+import { SerializableObject } from "../object"
 import { Polynomial } from "./polynomial"
 
 class ExponentLengthError extends CustomError {
@@ -15,7 +16,7 @@ class ExponentConstantError extends CustomError {
   }
 }
 
-export class Exponent implements HashableInputFactory {
+export class Exponent extends SerializableObject implements HashableInputFactory {
   public readonly curve: Curve
   public readonly isConstant: boolean
   public readonly coefficients: ProjectivePoint[]
@@ -25,6 +26,7 @@ export class Exponent implements HashableInputFactory {
     isConstant = false,
     coefficients = [],
   }: { curve: Curve; isConstant?: boolean; coefficients?: ProjectivePoint[] }) {
+    super()
     this.curve = curve
     this.isConstant = isConstant
     this.coefficients = coefficients

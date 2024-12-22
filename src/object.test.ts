@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "bun:test"
+import { describe, expect, test } from "bun:test"
 import { SerializableObject, Serializer, SerializerUnknownTypeError } from './object'
 
 class TestObject extends SerializableObject {
@@ -22,17 +22,20 @@ class ComplexObject extends SerializableObject {
 
 describe('serializable objects', () => {
   describe('Serializer', () => {
-    beforeEach(() => {
-      Serializer.addType('TestObject', TestObject)
-      Serializer.addType('ComplexObject', ComplexObject) 
-    })
-
     describe('serialize', () => {
       test('handles primitive types', () => {
         expect(Serializer.serialize('test')).toBe('test')
         expect(Serializer.serialize(123)).toBe(123)
         expect(Serializer.serialize(true)).toBe(true)
         expect(Serializer.serialize(null)).toBe(null)
+      })
+
+      test('handles Uint8Array', () => {
+        const arr = new Uint8Array([1, 2, 3])
+        expect(Serializer.serialize(arr)).toEqual({
+          __t: 'Uint8Array',
+          __j: { value: '010203' }
+        })
       })
 
       test('handles BigInt', () => {
@@ -91,6 +94,16 @@ describe('serializable objects', () => {
         expect(Serializer.deserialize(123)).toBe(123)
         expect(Serializer.deserialize(true)).toBe(true)
         expect(Serializer.deserialize(null)).toBe(null)
+      })
+
+      test('handles Uint8Array', () => {
+        const serialized = { 
+          __t: 'Uint8Array', 
+          __j: { value: '010203' }
+        }
+        const result = Serializer.deserialize(serialized)
+        expect(result).toBeInstanceOf(Uint8Array)
+        expect(Array.from(result)).toEqual([1, 2, 3])
       })
 
       test('handles BigInt', () => {

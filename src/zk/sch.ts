@@ -1,10 +1,12 @@
 import type { AffinePoint, Curve } from "../curves"
 import type { HashableInput, HashableInputFactory } from "../hasher"
+import { SerializableObject } from "../object"
 
-export class SchnorrCommitment implements HashableInputFactory {
+export class SchnorrCommitment extends SerializableObject implements HashableInputFactory {
   public readonly C: AffinePoint
 
   constructor({ C }: { C: AffinePoint }) {
+    super()
     this.C = C
   }
 
@@ -13,7 +15,7 @@ export class SchnorrCommitment implements HashableInputFactory {
   }
 }
 
-export class SchnorrRandomness {
+export class SchnorrRandomness extends SerializableObject {
   public readonly a: bigint
   public readonly commitment: SchnorrCommitment
 
@@ -21,6 +23,7 @@ export class SchnorrRandomness {
     a,
     commitment,
   }: { a: bigint; commitment: SchnorrCommitment }) {
+    super()
     this.a = a
     this.commitment = commitment
   }

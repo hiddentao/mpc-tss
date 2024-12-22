@@ -1,5 +1,6 @@
 import { CustomError } from "ts-custom-error"
 import type { Curve } from "../curves"
+import { SerializableObject } from "../object"
 
 export class PolynomialSecretLeakError extends CustomError {
   constructor() {
@@ -7,7 +8,7 @@ export class PolynomialSecretLeakError extends CustomError {
   }
 }
 
-export class Polynomial {
+export class Polynomial extends SerializableObject {
   public readonly curve: Curve
   public readonly degree: number
   public readonly constant: bigint
@@ -22,6 +23,7 @@ export class Polynomial {
    * @param constant The constant term. Defaults to 0 if not set.
    */
   constructor({ curve, degree, constant = 0n }: { curve: Curve, degree: number, constant?: bigint }) {
+    super()
     this.curve = curve
     this.degree = degree
     this.constant = constant

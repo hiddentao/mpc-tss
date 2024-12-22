@@ -1,6 +1,7 @@
 import { CustomError } from "ts-custom-error"
 import type { AffinePoint } from "../../../curves/types"
 import { Hasher } from "../../../hasher"
+import { SerializableObject } from "../../../object"
 import type { PaillierSecretKey } from "../../../paillier"
 import type { PedersenParams } from "../../../pedersen"
 import type { Exponent } from "../../../polynomial/exponent"
@@ -26,7 +27,7 @@ export type CmpKeygenRound2Message = {
   decommitment: Uint8Array
 }
 
-export class CmpKeygenRound2 implements Round {
+export class CmpKeygenRound2 extends SerializableObject implements Round {
   public readonly vssPolynomial: Exponent
   public readonly commitment: Uint8Array
   public readonly rid: bigint
@@ -65,6 +66,8 @@ export class CmpKeygenRound2 implements Round {
     schnorrRand: SchnorrRandomness
     decommitment: Uint8Array
   }) {
+    super()
+
     this.vssPolynomial = vssPolynomial
     this.commitment = commitment
     this.rid = rid
